@@ -169,6 +169,7 @@ img {
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 30px;
+    width: 100%;
 }
 
 .cards .card {
@@ -237,10 +238,13 @@ img {
 
 .card--bigger .card-heading {
     color: #c2c2c2;
+    text-align: center;
 }
 
 .card--bigger .content {
     margin-top: 10px;
+    display: flex;
+    justify-content: center;
 }
 
 .card--bigger .content p:first-child {
