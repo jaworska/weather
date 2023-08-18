@@ -8,49 +8,26 @@ class Weather {
     this.location = document.querySelector("#location"),
     this.uvIndex = document.querySelector(".uv-index"),
     this.pressure = document.querySelector(".pressure"),
-    this.sunRise = document.querySelector(".sun-rise"),
-    this.sunSet = document.querySelector(".sun-set"),
+    this.sunrise = document.querySelector(".sun-rise"),
+    this.sunset = document.querySelector(".sun-set"),
     this.humidity = document.querySelector(".humidity"),
-    this.airQuality = document.querySelector(".air-quality"),
+    this.feelsLike = document.querySelector(".feels-like"),
     this.tempUnits = document.querySelectorAll(".temp-unit"),
     this.weatherCards = document.querySelector("#weather-cards");
     this.tempUnitDefault = "c";
     this.timeSpan = "week";
     this.city = "";
 
-    this.date.innerText = this.getDate();
+    this.date.innerText = this._getDate();
 
     setInterval(() => {
-      this.date.innerText = this.getDate();
+      this.date.innerText = this._getDate();
     }, 1000);
     
     this.getLocation();
     this.changeUnit();
     this.changeTimeSpan();
   }
-
-  getDate(date) {
-    this.now = new Date();
-    this.hour = this.now.getHours();
-    this.minute = (this.now.getMinutes() < 10 ? "0" : "") + this.now.getMinutes();
-    this.days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    this.day = this.days[this.now.getDay()];
-
-    if(date) {
-      this.day = new Date(date);
-      return this.days[this.day.getDay()];
-    } else {
-      return `${this.day}, ${this.hour}:${this.minute}`;
-    }
-  };
 
   getLocation() {
     fetch("https://geolocation-db.com/json/", {
@@ -59,8 +36,8 @@ class Weather {
     })
       .then((response) => response.json())
       .then((data) => {
-          this.city = data.city;
-          this.getWeatherData(data.city, this.tempUnitDefault, this.timeSpan);
+          this.city = `${data.latitude},${data.longitude}`;
+          this.getWeatherData(this.city, this.tempUnitDefault, this.timeSpan);
       })
       .catch((err) => {
           console.error(err);
@@ -68,60 +45,56 @@ class Weather {
   };
 
   getWeatherData(city, unit, timeSpan) {
+    if(this.timeSpan == 'week') {
+      this.days = 7;
+    } else {
+      this.days = 1;
+    }
     fetch(
-      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}?unitGroup=metric&key=EJ6UBL2JEQGYB3AA4ENASN62J&contentType=json`,
-      {
+      `https://api.weatherapi.com/v1/forecast.json?key=35afcbf15da24c579f064913231808&q=${city}&days=${this.days}&aqi=no&alerts=no`, {
         method: "GET",
         headers: {},
       }
     )
       .then((response) => response.json())
       .then((data) => {
-        this.weatherData = data.currentConditions;
+        this.weatherData = data.current;
+        this.weatherDataForecast = data.forecast;
+        this.weatherDataLocation = data.location;
+        this.weatherDataCondition = this.weatherData.condition;
 
         if (unit === "c") {
-          this.temp.innerText = this.weatherData.temp;
+          this.temp.innerText = this.weatherData.temp_c;
+          this.feelsLike.innerText = this.weatherData.feelslike_c;
         } else {
-          this.temp.innerText = this.celciusToFahrenheit(this.weatherData.temp);
+          this.temp.innerText = this.weatherData.temp_f;
+          this.feelsLike.innerText = this.weatherData.feelslike_f;
         }
 
-        this.pressure.innerText = this.weatherData.pressure;
-        this.address = data.resolvedAddress.split(", ");
-        this.location.innerText = `${this.address[0]}, ${this.address[2]}`;
-        this.condition.innerText = this.weatherData.conditions;
-        this.uvIndex.innerText = this.weatherData.uvindex;
-        this.mainIcon.src = this.getIcon(this.weatherData.icon);
+        this.pressure.innerText = this.weatherData.pressure_mb;
+        this.location.innerText = `${this.weatherDataLocation.name}, ${this.weatherDataLocation.country}`;
+        this.condition.innerText = this.weatherDataCondition.text;
+        this.uvIndex.innerText = this.weatherData.uv;
+        this.mainIcon.src = this.weatherDataCondition.icon;
         this.humidity.innerText = `${this.weatherData.humidity} %`;
-        this.airQuality.innerText = this.weatherData.winddir;
+        this.sunriseTime = this.weatherDataForecast.forecastday[0].astro.sunrise.split(" ")
+        this.sunrise.innerText = this.sunriseTime[0];
+        this.sunriseFormat = this.sunrise.nextElementSibling;
+        this.sunriseFormat.innerText = this.sunriseTime[1];
+        this.sunsetTime = this.weatherDataForecast.forecastday[0].astro.sunset.split(" ")
+        this.sunset.innerText = this.sunsetTime[0];
+        this.sunsetFormat = this.sunset.nextElementSibling;
+        this.sunsetFormat.innerText =  this.sunsetTime[1];
 
         if (timeSpan === "hours") {
-          this.updateForecast(data.days[0].hours, unit, "day");
+          this.updateForecast(this.weatherDataForecast.forecastday[0].hour, unit, "day");
         } else {
-          this.updateForecast(data.days, unit, "week");
+          this.updateForecast(this.weatherDataForecast.forecastday, unit, "week");
         }
-
-        this.sunRise.innerText = this.getHour(this.weatherData.sunrise);
-        this.sunSet.innerText = this.getHour(this.weatherData.sunset);
       })
       .catch((err) => {
         console.log(err);
       });
-  };
-
-  getIcon(condition) {
-    if (condition === "partly-cloudy-day" || condition === "cloudy") {
-      return "img/cloudy.png";
-    } else if (condition === "partly-cloudy-night") {
-      return "img/cloud.png";
-    } else if (condition === "rain") {
-      return "img/rainy.png";
-    } else if (condition === "clear-day") {
-      return "img/sun.png";
-    } else if (condition === "clear-night") {
-      return "img/night.png";
-    } else {
-      return "img/sun.png";
-    }
   };
 
   updateForecast(data, unit, type) {
@@ -137,22 +110,29 @@ class Weather {
     for (let i = 0; i < this.cardsNum; i++) {
       this.card = document.createElement("div");
       this.card.classList.add("card");
-      this.dayName = this.getHour(data[i].datetime);
-      this.dayTemp = data[i].tempmax ? data[i].tempmax : data[i].temp;
 
       if (type === "week") {
-        this.dayName = this.getDate(data[i].datetime);
-      }
-      if (unit === "f") {
-        this.dayTemp = this.celciusToFahrenheit(data[i].temp);
-      }
-
-      this.iconCondition = data[i].icon;
-      this.iconSrc = this.getIcon(this.iconCondition);
-      this.tempUnit = "°C";
-
-      if (unit === "f") {
-        this.tempUnit = "°F";
+        this.dayName = this._getDate(data[i].date);
+        this.iconCondition = data[i].day.condition.text;
+        this.iconSrc = data[i].day.condition.icon;
+        if (unit === "f") {
+          this.dayTemp = data[i].day.maxtemp_f;
+          this.tempUnit = "°F";
+        } else {
+          this.dayTemp = data[i].day.maxtemp_c;
+          this.tempUnit = "°C";
+        }
+      } else {
+        this.dayName = data[i].time.split(" ")[1];
+        this.iconCondition = data[i].condition.text;
+        this.iconSrc = data[i].condition.icon;
+        if (unit === "f") {
+          this.dayTemp = data[i].temp_f;
+          this.tempUnit = "°F";
+        } else {
+          this.dayTemp = data[i].temp_c;
+          this.tempUnit = "°C";
+        }
       }
 
       this.card.innerHTML = `
@@ -167,16 +147,6 @@ class Weather {
       `;
       this.weatherCards.append(this.card);
     }
-  };
-
-  getHour(time) {
-    this.hour = time.split(":")[0];
-    this.min = time.split(":")[1];
-    return `${this.hour}:${this.min}`;
-  };
-
-  celciusToFahrenheit = (temp) => {
-    return ((temp * 9) / 5 + 32).toFixed(1);
   };
 
   changeUnit() {
@@ -233,6 +203,32 @@ class Weather {
       }
 
       this.getWeatherData(this.city, this.tempUnitDefault, this.timeSpan);
+    }
+  };
+
+  _getDate(date) {
+    this.now = new Date();
+    this.hour = this.now.getHours();
+    this.minute = (this.now.getMinutes() < 10 ? "0" : "") + this.now.getMinutes();
+    this.days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    this.day = this.days[this.now.getDay()];
+    this.timeFormat = this.hour >= 12 ? 'pm' : 'am';
+    this.hour = this.hour % 12;
+    this.hour = this.hour ? this.hour : 12;
+
+    if(date) {
+      this.day = new Date(date);
+      return this.days[this.day.getDay()];
+    } else {
+      return `${this.day}, ${this.hour}:${this.minute} ${this.timeFormat}`;
     }
   };
 }

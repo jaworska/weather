@@ -52,13 +52,14 @@ img {
 
 .weather-icon {
     width: 100%;
-    height: 140px;
+    height: 80px;
     margin-top: 20px;
     margin-bottom: 20px;
 }
 
 .weather-icon #icon {
-    width: 50%;
+    max-width: 84px;
+    width: 100%;
     object-fit: cover;
 }
 
@@ -201,7 +202,8 @@ img {
 }
 
 .card .card-icon {
-    width: 30%;
+    width: 100%;
+    max-width: 44px;
     margin: 0 auto;
 }
 
@@ -254,16 +256,71 @@ img {
 
 .card--bigger .content p:nth-child(2) {
     font-size: 12px;
-    margin-top: 10px;
+    margin-top: 5px;
     text-align: right;
 }
 
-.credits {
-    text-align: center;
-    font-size: 12px;
-    color: #c2c2c2;
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
+.card--bigger .content p.time-format {
+    text-transform: lowercase;
+    display: flex;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.highlights .heading {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    body {
+        min-width: 100%;
+        padding: 30px;
+    }
+    .sidebar {
+        width: 100%;
+    }
+    .main {
+        width: 100%;
+        min-width: 100%;
+        padding: 20px 20px;
+        padding-bottom: 30px;
+    }
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 100%;
+    }
+    .cards .card {
+        width: calc(100% / 2 - 14px); 
+        height: 130px; 
+    }
+    .card--bigger {
+        width: 100%; 
+        height: 130px;
+    }
+    .divider {
+        display: none;
+    }
+    .highlights .heading {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #495057;
+        text-transform: capitalize;
+    }
+    .highlights .cards {
+        margin-top: 0;
+    }
+
+    .weather-icon {
+        display: none;
+    }
+    .main nav .units button {
+        width: 50px;
+        height: 50px;
+    }
+    .card .card-icon {
+        max-width: 54px;
+    }
 }
