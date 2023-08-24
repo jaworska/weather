@@ -14,6 +14,8 @@ class Weather {
     this.feelsLike = document.querySelector(".feels-like"),
     this.tempUnits = document.querySelectorAll(".temp-unit"),
     this.weatherCards = document.querySelector("#weather-cards");
+    this.search = document.querySelector("#search");
+    this.searchBtn = document.querySelector("#search button");
     this.tempUnitDefault = "c";
     this.timeSpan = "week";
     this.city = "";
@@ -27,6 +29,11 @@ class Weather {
     this.getLocation();
     this.changeUnit();
     this.changeTimeSpan();
+
+    this.searchBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.searchCity();
+    });
   }
 
   getLocation() {
@@ -42,6 +49,13 @@ class Weather {
       .catch((err) => {
           console.error(err);
       });
+  };
+
+  searchCity() {
+    const citySearch = this.search.querySelector("input").value;
+    if(citySearch) {
+      this.getWeatherData(citySearch, this.tempUnitDefault, this.timeSpan);
+    }
   };
 
   getWeatherData(city, unit, timeSpan) {
