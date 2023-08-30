@@ -378,4 +378,8 @@ img {
     .card .card-icon {
         max-width: 54px;
     }
+
+    .search input {
+        font-size: 16px;
+    }
 }
