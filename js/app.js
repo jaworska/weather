@@ -52,7 +52,14 @@ class Weather {
   };
 
   searchCity() {
-    const citySearch = this.search.querySelector("input").value;
+    let citySearch = this.search.querySelector("input").value;
+    const letters     = ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'];
+    const replacement = ['a', 'c', 'e', 'l', 'n', 'o', 's', 'z', 'z'];
+
+    for (let i = 0; i < letters.length; ++i) {
+      citySearch = citySearch.replaceAll(letters[i], replacement[i]);
+    }
+
     if(citySearch) {
       this.getWeatherData(citySearch, this.tempUnitDefault, this.timeSpan);
     }
