@@ -254,4 +254,4 @@ class Weather {
   };
 }
 
-const weather = new Weather("#weather-app"); 
+const weather = new Weather("#weather-app");
